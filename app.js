@@ -38,7 +38,7 @@ async function scrapeAllPages(){
     const allProducts = [];
 
     for(let i = 1; i <= 5; i++){
-        const url = `${baseUrl}?page=${i}`;
+        const git = `${baseUrl}?page=${i}`;
         console.log(`Page ${i}: ${url}`);
 
         const products = await scrapeData(url);
