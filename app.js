@@ -11,6 +11,7 @@ const XLSX = require('xlsx');
 
 
 const baseUrl = "https://www.novagroupe.eu/poeles--1.html";
+const host = "www.novagroupe.eu";
 const totalPages = 5;
 
 async function scrapeData(url){
@@ -37,7 +38,27 @@ async function scrapeData(url){
     }
 }
 
+async function scrapeTable(links){
+    for ( const link of links ){
+        try{
+            const { data } = await axios.get(link, {
+                headers : { 
+                 Host: host, //utilisation hote reel    
+                },
+            });
+            const $ = cheerio.load(data);
 
+          const ficheTechniqueDivs = $('.bloc fiche_technique');
+          ficheTechniqueDivs.each((index, element)=> {
+            const content = $(element).text();
+            console.log(content);
+          })
+        }catch(error){
+            console.log('une erreur est survenue lors de la récupération des tables pour le liens ${link}' );
+            console.error(error);
+        }
+    }
+}
 
 
 async function scrapeAllPages(){
@@ -53,22 +74,16 @@ async function scrapeAllPages(){
 
     console.log(allLinks);
 
-     //conversion des données json en format excel
-
-     /* const xls = json2xls(allLinks); */
-
-     //ecriture du fichier excel
-
-     /* fs.writeFileSync('Liens-poeles.xls', xls, 'binary');
-     console.log("donnees exportees vers le fichier excel"); */
-     // Conversion des données en format Excel
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet(allLinks);
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Liens');
   const excelFilePath = 'Liens-poeles.xlsx';
   XLSX.writeFile(workbook, excelFilePath);
   console.log(`Données exportées vers le fichier Excel : ${excelFilePath}`);
+
+  await scrapeTable(allLinks);
 }
 
-scrapeAllPages();
+scrapeAllPages()
+
 
